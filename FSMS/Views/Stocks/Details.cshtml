@@ -1,0 +1,57 @@
+﻿@model FSMS.Models.ViewStockVIewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12 col-sm-6">
+                        <h3 class="d-inline-block d-sm-none">
+                            @Html.DisplayFor(model => model.Name)
+                        </h3>
+                        @{
+                            if (Model.Picture != String.Empty)
+                            {
+                                <div class="col-12">
+                                    <img src="~/images/@Model.Picture" class="product-image" alt="Product Image">
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <h3 class="my-3">@Model.Name</h3>
+                        <p>
+                            @Html.DisplayFor(model => model.Description)
+                        </p>
+
+                        <hr>
+
+                        <div class="bg-gray py-2 px-3 mt-4">
+                            <h2 class="mb-0">
+                                RM @Html.DisplayFor(model => model.Price)
+                            </h2>
+                        </div>
+
+                        <div class="mt-4 row">
+                            <a href="@Url.Action("Edit", "Stocks", new { id = @Model.Id })" class="btn btn-primary btn-lg btn-flat">
+                                <i class="fas fa-pen fa-lg mr-2"></i>
+                                Edit Stock
+                            </a>
+                            <form method="post" asp-action="Delete">
+                                <input type="hidden" asp-for="Id" />
+                                <button type="submit" class="btn btn-danger btn-lg btn-flat">
+                                    <i class="fas fa-trash fa-lg mr-2"></i>
+                                    Delete Stock
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

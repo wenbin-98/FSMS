@@ -1,0 +1,19 @@
+﻿@model List<FSMS.Models.DeliveryOrderStocksDetails>;
+@{
+    if (Model != null)
+    {
+        var items = Model;
+        var i = 0;
+        foreach (var item in (items))
+        {
+            <tr class="product-row">
+                <td class="col-1 product-id text-center">@item.Id</td>
+                <td class="col-3">@item.Name</td>
+                <td>@item.Description</td>
+                <td class="col-2"><input class="form-control product-quantity" style="text-align: center;" asp-for="@items[i].Quantity" /></td>
+                <td class="col-1"><button type="button" class="btn btn-danger" data-id=@item.Id data-name=@item.Name data-desc="@item.Description"><i class="fas fa fa-trash-alt"></i></button></td>
+            </tr>
+            i++;
+        }
+    }
+}

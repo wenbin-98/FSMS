@@ -1,0 +1,17 @@
+﻿@model FSMS.Models.DocumentCustomerDetailViewModel;
+@{
+    if (Model != null) {
+        <address>
+            <strong>@Model.Name</strong><br>
+            @Model.Address1<br />
+            @if (!String.IsNullOrEmpty(Model.Address2))
+            {
+                @Model.Address2<br />
+            }
+            @Model.Postcode @Model.City<br />
+            @Model.State<br />
+            Phone: @Model.PhoneNo<br>
+            Email: @Model.Email
+        </address>
+    }
+}

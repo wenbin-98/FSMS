@@ -1,0 +1,120 @@
+﻿@model FSMS.Models.AddCustomerViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-12">
+                    <form asp-action="Create" id="form-add-customer">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Address1" class="control-label"></label>
+                            <input asp-for="Address1" class="form-control" />
+                            <input asp-for="Address2" class="form-control" />
+                            <span asp-validation-for="Address1" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Postcode" class="control-label"></label>
+                            <input asp-for="Postcode" class="form-control" />
+                            <span asp-validation-for="Postcode" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="City" class="control-label"></label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="State" class="control-label"></label>
+                            <input asp-for="State" class="form-control" />
+                            <span asp-validation-for="State" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Phone" class="control-label"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        var currentFormData = null;
+        var FormSetup;
+
+        const _formSetup = () => {
+            const detectChanges = (e) => {
+                let form = document.getElementById("form-add-customer");
+                formData = toDTO(form);
+                if ((JSON.stringify(currentFormData) != JSON.stringify(formData)) || documentStatus != 0) {
+                    e.preventDefault();
+                    e.returnValue = 'Changes you made may not be saved.';
+                }
+            }
+
+            /* Used to save inital form data for comparison later */
+            const initCurrentFormData = () => {
+                let form = document.getElementById("form-add-customer");
+                currentFormData = toDTO(form);
+            }
+            const wireUpEvent = () => {
+                // Assign check document changes event
+                window.addEventListener("beforeunload", detectChanges);
+
+                let form = document.getElementById("form-add-customer");
+                form.addEventListener('submit', (e) => {
+                    window.removeEventListener("beforeunload", detectChanges);
+                });
+            }
+            
+            const init = () => {
+                wireUpEvent();
+                initCurrentFormData();
+            }
+
+            init();
+        }
+
+        const init = () => {
+            FormSetup = _formSetup();
+        }
+
+        const ready = (fn) => {
+            if (document.readyState != 'loading') {
+                fn();
+            } else if (document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', fn);
+            } else {
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState != 'loading')
+                        fn();
+                });
+            }
+        }
+
+        ready(init);
+    </script>
+}
+

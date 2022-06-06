@@ -1,0 +1,335 @@
+﻿@model FSMS.Models.EditInvoiceWrapper
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/select2/css/select2.css">
+    <link rel="stylesheet" href="~/lib/datepicker/datepicker.css" />
+    <style>
+        button > * {
+            pointer-events: none;
+        }
+    </style>
+}
+<form id="form-edit-document" asp-action="EditInvoice" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="Invoice.Id" />
+    <input type="hidden" asp-for="Invoice.SerialNo" />
+    <input type="hidden" asp-for="Invoice.CustomerId" />
+    <input type="hidden" asp-for="Invoice.Date" />
+    <input type="hidden" asp-for="Invoice.Stocks" />
+    <input type="hidden" asp-for="Invoice.DueDate" />
+    <input type="hidden" asp-for="Invoice.Subtotal" />
+    <input type="hidden" asp-for="Invoice.Tax" />
+    <input type="hidden" asp-for="Invoice.ShippingFee" />
+    <input type="hidden" asp-for="Invoice.Price" />
+    <input type="hidden" asp-for="Invoice.PurchaseOrder" />
+</form>
+<div class="row">
+    <div class="col-12">
+        <!-- Main content -->
+        <div class="invoice p-3 mb-3">
+            <!-- title row -->
+            <div class="row">
+                <div class="col-12">
+                    <h4>
+                        <i class="fas fa-globe"></i> Lean Aik Furniture
+                    </h4>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- info row -->
+            <div class="row invoice-info">
+                <!-- Merchant Information -->
+                <div class="col-sm-4 invoice-col border-right">
+                    From <a href="#" data-toggle="modal" data-target="#modal-edit-personal" class="float-right">Edit Details</a>
+                    <div id="merchant-detail">
+                        @await Html.PartialAsync("_CustomerDetailPartiaView", Model.Merchant)
+                    </div>
+                </div>
+                <!-- Customer Information -->
+                <div class="col-sm-4 invoice-col border-right">
+                    To <a href="#" data-toggle="modal" data-target="#modal-edit-customer" class="float-right">Edit Client</a>
+                    <div id="customer-detail">
+                        @await Html.PartialAsync("_CustomerDetailPartiaView", Model.Customer)
+                    </div>
+                </div>
+                 <!-- Document Information -->
+                <div class="col-sm-4 invoice-col" id="doc-info">
+                    <b>Invoice # I<span id="doc-no">@String.Format("{0:00000}", Model.ViewModel.SerialNo).ToString()</span></b><a href="#" data-toggle="modal" data-target="#modal-edit-information" class="float-right">Edit Details</a><br>
+                    <br />
+                    <b>P/O:</b> <span id="purchase-order">@Model.ViewModel.PurchaseOrder</span><br>
+                    <b>Date:</b> <span id="doc-date">@String.Format("{0:dd-MM-yyyy}", Model.ViewModel.Date).ToString()</span><br>
+                    <b>Date Validity:</b> <span id="doc-due-date">@String.Format("{0:dd-MM-yyyy}", Model.ViewModel.DueDate).ToString()</span><br>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <br />
+            <!-- Table row -->
+            <div class="row">
+                <div class="col-12 table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="col-1" scope="col">Serial #</th>
+                                <th class="col-5" scope="col">Product</th>
+                                <th class="col-1 text-center" scope="col">Quantity</th>
+                                <th class="col-2 text-center" scope="col">Unit Price (RM)</th>
+                                <th class="col-2 text-center" scope="col">Subtotal (RM)</th>
+                                <th class="col-1" scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-container" class="product-container">
+                            @await Html.PartialAsync("_InvoiceProductPartialView", Model.ViewModel.Stocks)
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <p><button type="button" class="btn btn-light" data-toggle="modal" data-target="#modal-add-product"><i class="fas fa fa-plus-circle"></i> Add Product</button></p>
+            <div class="row">
+                <div class="col-6 offset-6">
+
+                    <div class="table-responsive">
+                        <table class="table" id="doc-price">
+                            <tr>
+                                <th class="lead" style="border: 0;">Amount</th>
+                            </tr>
+                            <tr>
+                                <th style="width:50%">Subtotal RM</th>
+                                <td><input asp-for="ViewModel.Subtotal" class="form-control-plaintext" readonly /></td>
+                            </tr>
+                            <tr>
+                                <th>Tax (6%) RM</th>
+                                <td><input asp-for="ViewModel.Tax" class="form-control-plaintext" readonly /></td>
+                            </tr>
+                            <tr>
+                                <th>Shipping Fee RM</th>
+                                <td><input asp-for="ViewModel.ShippingFee" class="form-control calculate-field" /></td>
+                            </tr>
+                            <tr>
+                                <th>Total RM</th>
+                                <td><input asp-for="ViewModel.Price" class="form-control-plaintext" readonly /></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- this row will not appear when printing -->
+            <div class="row no-print">
+                <div class="col-12">
+                    <button type="button" id="btn-submit-form" class="btn btn-success float-right"><i class="far fa-save"></i> Save Invoice</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.invoice -->
+
+<!-- Modal Edit Merchant Detail -->
+<div class="modal fade" id="modal-edit-personal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Information</h4>
+                <button type="button" class="close close-btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit-merchant" asp-action="EditCustomerDetail" asp-controller="Customer">
+                        <input asp-for="Merchant.Id" type="hidden" />
+                    <div class="form-group">
+                        <label asp-for="Merchant.Name" class="control-label"></label>
+                        <input asp-for="Merchant.Name" class="form-control" />
+                        <span asp-validation-for="Merchant.Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.Address1" class="control-label"></label>
+                        <input asp-for="Merchant.Address1" class="form-control" />
+                        <input asp-for="Merchant.Address2" class="form-control" />
+                        <span asp-validation-for="Merchant.Address1" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.Postcode" class="control-label"></label>
+                        <input asp-for="Merchant.Postcode" class="form-control" />
+                        <span asp-validation-for="Merchant.Postcode" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.City" class="control-label"></label>
+                        <input asp-for="Merchant.City" class="form-control" />
+                        <span asp-validation-for="Merchant.City" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.State" class="control-label"></label>
+                        <input asp-for="Merchant.State" class="form-control" />
+                        <span asp-validation-for="Merchant.State" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.PhoneNo" class="control-label"></label>
+                        <input asp-for="Merchant.PhoneNo" class="form-control" />
+                        <span asp-validation-for="Merchant.PhoneNo" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Merchant.Email" class="control-label"></label>
+                        <input asp-for="Merchant.Email" class="form-control" />
+                        <span asp-validation-for="Merchant.Email" class="text-danger"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default close-btn" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-edit-merchant">Submit</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- Modal Change Customer -->
+<div class="modal fade" id="modal-edit-customer" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Client</h4>
+                <button type="button" class="close close-btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit-customer" asp-action="RenderCustomerDetailPartialView" asp-controller="Customer">
+                    <div class="form-group">
+                        <label asp-for="ViewModel.CustomerId" class="control-label"></label>
+                        <select asp-for="ViewModel.CustomerId" class="form-control" style="width:100%;">
+                        </select>
+                        <span asp-validation-for="ViewModel.CustomerId" class="text-danger"></span>
+                    </div> 
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default close-btn" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="btn-edit-customer">Submit</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<!-- Modal Edit Document Detail -->
+<div class="modal fade" id="modal-edit-information" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Details</h4>
+                <button type="button" class="close close-btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit-information">
+                    <div class="form-group row">
+                        <label asp-for="ViewModel.SerialNo" class="col-sm-2 col-form-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="ViewModel.SerialNo" class="form-control" placeholder="001" />
+                            <span asp-validation-for="ViewModel.SerialNo" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label asp-for="ViewModel.PurchaseOrder" class="col-sm-2 col-form-label"></label>
+                        <div class="col-sm-10">
+                            <input asp-for="ViewModel.PurchaseOrder" class="form-control" placeholder="001" />
+                            <span asp-validation-for="ViewModel.PurchaseOrder" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="date1" class="col-sm-2 col-form-label">Date</label>
+                        <div class="col-sm-10">
+                            <input asp-for="ViewModel.Date" type="text" class="form-control date-input" placeholder="01/01/2021" />
+                            <span asp-validation-for="ViewModel.Date" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="date" class="col-sm-2 col-form-label">Date Validity</label>
+                        <div class="col-sm-10">
+                            <input asp-for="ViewModel.DueDate" type="text" class="form-control date-input" placeholder="01/01/2021" />
+                            <span asp-validation-for="ViewModel.DueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default close-btn" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-edit-information">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Product -->
+<div class="modal fade" id="modal-add-product" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Product</h4>
+                <button type="button" class="close close-btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-add-product" asp-action="RenderInvoiceProductPartialView" asp-controller="Stocks">
+                    <div class="form-group">
+                        <label asp-for="AddProduct.Id" class="control-label"></label>
+                        <select asp-for="AddProduct.Id" class="form-control" style="width:100%;">
+                        </select>
+                        <span asp-validation-for="AddProduct.Id" class="text-danger"></span>
+                    </div> 
+                    <input asp-for="AddProduct.Name" type="hidden" />
+                    <div class="form-group">
+                        <label asp-for="AddProduct.Description" class="control-label"></label>
+                        <input asp-for="AddProduct.Description" class="form-control" />
+                        <span asp-validation-for="AddProduct.Description" class="text-danger"></span>
+                    </div> 
+                    <div class="form-group">
+                        <label asp-for="AddProduct.Quantity" class="control-label"></label>
+                        <input asp-for="AddProduct.Quantity" class="form-control" />
+                        <span asp-validation-for="AddProduct.Quantity" class="text-danger"></span>
+                    </div> 
+                    <div class="form-group">
+                        <label asp-for="AddProduct.UnitPrice" class="control-label"></label>
+                        <input asp-for="AddProduct.UnitPrice" class="form-control" />
+                        <span asp-validation-for="AddProduct.UnitPrice" class="text-danger"></span>
+                    </div> 
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default close-btn" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btn-add-product">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script type="text/javascript" src="~/lib/select2/js/select2.min.js"></script>
+    <script type="text/javascript" src="~/lib/datepicker/datepicker.js"></script>
+    <script type="text/javascript" src="~/lib/moment/moment.min.js"></script>
+
+    <script type="text/javascript">
+        var customerId = @(ViewBag.CustomerId ?? 0);
+        var documentId = @(ViewBag.Id ?? 0);
+        $.validator.setDefaults({
+            ignore: null
+        });
+    </script>
+    <script type="text/javascript" src="~/js/Scripts/EditInvoiceScript.js"></script>
+}

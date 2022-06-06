@@ -1,0 +1,205 @@
+﻿@model IEnumerable<FSMS.Models.CustomerListViewModel>
+
+@{
+    ViewData["Title"] = "Customer";
+}
+
+@section Styles{
+    <!-- DataTables -->
+    <link rel="stylesheet" href="~/lib/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/lib/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="~/lib/datatables-buttons/css/buttons.bootstrap4.min.css">
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-6 offset-md-6">
+                        @Html.ActionLink("New Customer", "Create", "Customer", null, new { @class = "float-right btn btn-primary" })
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-header -->
+
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Name
+                            </th>
+                            <th>
+                                Phone No.
+                            </th>
+                            <th class="no-sort"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Phone)
+                                    </td>
+                                    <td class="row float-right">
+                                        <a class="btn btn-primary btn-sm" href="@Url.Action("Details", "Customer", new{ id = item.Id})" id="view-btn">
+                                            <i class="fas fa-folder">
+                                            </i>
+                                            View
+                                        </a> &nbsp;
+                                        <a class="btn btn-info btn-sm" href="@Url.Action("Edit", "Customer", new{ id = item.Id})">
+                                            <i class="fas fa-pencil-alt">
+                                            </i>
+                                            Edit
+                                        </a> &nbsp;
+                                        <form asp-action="Delete" method="post" class="form-delete">
+                                            <input type="hidden" asp-for="@item.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash">
+                                                </i>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Warning!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <span>Are you sure you want to delete admin?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" id="ok-btn" class="btn btn-danger" onclick="SuccessAlert();" data-dismiss="modal">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <!-- DataTables  & Plugins -->
+    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/lib/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="~/lib/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="~/lib/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="~/lib/jszip/jszip.min.js"></script>
+    <script src="~/lib/pdfmake/pdfmake.min.js"></script>
+    <script src="~/lib/pdfmake/vfs_fonts.js"></script>
+    <script src="~/lib/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="~/lib/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="~/lib/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script type="text/javascript">
+        var FormSetup = null;
+
+        const _formSetup = () => {
+
+            const deleteAlert = (e) => {
+                e.preventDefault();
+                Swal.fire({
+                    title: '<strong><u>Attention</u></strong>',
+                    icon: 'warning',
+                    html:
+                        'Are you sure you want to delete this customer? <br />' +
+                        'All changes cannot be reverted',
+                    showCancelButton: true,
+                    focusConfirm: false,
+                    confirmButtonText:
+                        'Yes',
+                    cancelButtonText:
+                        'Cancel',
+                }).then((data => {
+                    if (data.value === true) {
+                        e.target.submit();
+                    }
+                }))
+            }
+
+            const wireUpEvent = () => {
+                let forms = document.getElementsByClassName("form-delete");
+                for (var i = 0; i < forms.length; i++){
+                    let form = forms[i];
+                    form.addEventListener("submit", deleteAlert);
+                }
+            }
+
+            const init = ()=> {
+                wireUpEvent();
+            }
+
+            init();
+        }
+
+        $(function () {
+            FormSetup = _formSetup();
+
+            $("table").DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "columnDefs": [
+                    {
+                        "targets": 2,
+                        "className": 'noVis'
+                    }
+                ],
+            }).buttons().container().appendTo('#DataTables_Table_0_wrapper .col-md-6:eq(0)');
+
+
+            @{
+                if (TempData["Edit"] != null)
+                {
+                    @:Toast.fire({
+                        @:icon: 'success',
+                        @:title: 'Customer updated successfully.'
+                    @:})
+                }
+
+                if (TempData["Create"] != null)
+                {
+                    @:Toast.fire({
+                        @:icon: 'success',
+                        @:title: 'Customer created successfully.'
+                    @:})
+                }
+
+                if (TempData["Delete"] != null)
+                {
+                    @:Toast.fire({
+                        @:icon: 'success',
+                        @:title: 'Customer deleted successfully.'
+                    @:})
+                }
+            }
+        })
+
+        var Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000
+        });
+
+
+    </script>
+}

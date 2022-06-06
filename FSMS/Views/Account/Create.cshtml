@@ -1,0 +1,120 @@
+﻿@model FSMS.Models.AddUserViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-12">
+                    <form asp-action="Create" id="form-add-account">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Username" class="control-label"></label>
+                            <input asp-for="Username" class="form-control" />
+                            <span asp-validation-for="Username" class="text-danger"></span>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label asp-for="Password" class="control-label"></label>
+                                <input asp-for="Password" class="form-control" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="RetypePassword" class="control-label"></label>
+                                <input asp-for="RetypePassword" class="form-control" />
+                                <span asp-validation-for="RetypePassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="month" class="col-form-label">Role : </label>
+                            <div class="">
+                                <select asp-for="Role" id="month" class="custom-select">
+                                    <option value="">Choose role...</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Staff">Staff</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Phone" class="control-label"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        var currentFormData = null;
+        var FormSetup;
+
+        const _formSetup = () => {
+            const detectChanges = (e) => {
+                let form = document.getElementById("form-add-account");
+                formData = toDTO(form);
+                if ((JSON.stringify(currentFormData) != JSON.stringify(formData)) || documentStatus != 0) {
+                    e.preventDefault();
+                    e.returnValue = 'Changes you made may not be saved.';
+                }
+            }
+
+            /* Used to save inital form data for comparison later */
+            const initCurrentFormData = () => {
+                let form = document.getElementById("form-add-account");
+                currentFormData = toDTO(form);
+            }
+            const wireUpEvent = () => {
+                // Assign check document changes event
+                window.addEventListener("beforeunload", detectChanges);
+
+                let form = document.getElementById("form-add-account");
+                form.addEventListener('submit', (e) => {
+                    window.removeEventListener("beforeunload", detectChanges);
+                });
+            }
+            
+            const init = () => {
+                wireUpEvent();
+                initCurrentFormData();
+            }
+
+            init();
+        }
+
+        const init = () => {
+            FormSetup = _formSetup();
+        }
+
+        const ready = (fn) => {
+            if (document.readyState != 'loading') {
+                fn();
+            } else if (document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', fn);
+            } else {
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState != 'loading')
+                        fn();
+                });
+            }
+        }
+
+        ready(init);
+    </script>
+}

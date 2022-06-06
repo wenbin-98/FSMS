@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Data;
 using System.Data.Odbc;
 using FSMS.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FSMS.Controllers
 {
@@ -20,8 +21,6 @@ namespace FSMS.Controllers
 
         public IActionResult Index()
         {
-            List<TestEmployee> employees = new List<TestEmployee>();
-            employees = _customerService.GetEmployees();
             return View();
         }
 

@@ -1,5 +1,6 @@
 using FSMS.Data;
 using FSMS.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,31 @@ var builder = WebApplication.CreateBuilder(args);
     //options.UseSqlServer(connectionString));
 //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    //.AddEntityFrameworkStores<ApplicationDbContext>();
+//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true);
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.AccessDeniedPath = "/Forbidden/";
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Login";
+    });
+
+builder.Services.AddAuthorization(option =>
+{
+    option.AddPolicy("ManagerOnly",
+        policy => policy.RequireRole("Manager"));
+});
 
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IStocksService, StocksService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IDeliveryOrderService, DeliveryOrderService>();
 
 var app = builder.Build();
 
@@ -31,17 +52,17 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-//app.MapRazorPages();
+app.MapRazorPages();
 
 app.Run();

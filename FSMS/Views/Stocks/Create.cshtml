@@ -1,0 +1,124 @@
+﻿@model FSMS.Models.AddStockViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="col-12">
+                    <form asp-action="Create" id="form-add-product" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <input asp-for="Description" class="form-control" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Price" class="control-label"></label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Quantity" class="control-label"></label>
+                            <input asp-for="Quantity" class="form-control" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Picture" class="control-label"></label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input asp-for="Picture" class="custom-file-input" type="file" />
+                                    <label class="custom-file-label"
+                                           for="Picture">Choose Picture</label>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Picture" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Create" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script type="text/javascript">
+        var FormSetup;
+
+        const _formSetup = () => {
+            
+            const detectChanges = (e) => {
+                let form = document.getElementById("form-add-product");
+                formData = toDTO(form);
+                if ((JSON.stringify(currentFormData) != JSON.stringify(formData)) || documentStatus != 0) {
+                    e.preventDefault();
+                    e.returnValue = 'Changes you made may not be saved.';
+                }
+            }
+
+            /* Used to save inital form data for comparison later */
+            const initCurrentFormData = () => {
+                let form = document.getElementById("form-add-product");
+                currentFormData = toDTO(form);
+            }
+
+            const fileChooserShowFileName = (e) => {
+                var fileName = document.getElementById("Picture").files[0].name;
+                var nextSibling = e.target.nextElementSibling
+                nextSibling.innerText = fileName
+            }
+
+            const wireUpEvent = () => {
+                // Add on change event to file chooser
+                document.querySelector('.custom-file-input').addEventListener('change', fileChooserShowFileName)
+
+                // Assign check document changes event
+                window.addEventListener("beforeunload", detectChanges);
+
+                let form = document.getElementById("form-add-product");
+                form.addEventListener('submit', (e) => {
+                    window.removeEventListener("beforeunload", detectChanges);
+                });
+            }
+            
+            const init = () => {
+                wireUpEvent();
+                initCurrentFormData();
+            }
+
+            init();
+        }
+
+        const init = () => {
+            FormSetup = _formSetup();
+        }
+
+        const ready = (fn) => {
+            if (document.readyState != 'loading') {
+                fn();
+            } else if (document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', fn);
+            } else {
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState != 'loading')
+                        fn();
+                });
+            }
+        }
+
+        ready(init);
+    </script>
+}

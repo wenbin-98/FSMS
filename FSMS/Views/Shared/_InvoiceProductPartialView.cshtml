@@ -1,0 +1,20 @@
+﻿@model List<FSMS.Models.InvoiceStocksDetails>;
+@{
+    if (Model != null)
+    {
+        var items = Model;
+        var i = 0;
+        foreach (var item in (items))
+        {
+            <tr class="product-row">
+                <td class="col-1 product-id text-center">@item.Id</td>
+                <td class="col-5">@item.Name <br />@item.Description</td>
+                <td class="col-1"><input class="form-control product-quantity calculate-field" style="text-align: center;" asp-for="@items[i].Quantity" /></td>
+                <td class="col-2"><input class="form-control product-price calculate-field" style="text-align: center;" asp-for="@items[i].UnitPrice" /></td>
+                <td class="col-2 text-center product-subtotal">@(item.Quantity * item.UnitPrice)</td>
+                <td class="col-1"><button type="button" class="btn btn-danger" data-id=@item.Id data-name=@item.Name data-desc="@item.Description"><i class="fas fa fa-trash-alt"></i></button></td>
+            </tr>
+            i++;
+        }
+    }
+}
